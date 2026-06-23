@@ -1,54 +1,73 @@
-> **🤖 Agents: read [`SKILL.md`](SKILL.md), not this file.** `SKILL.md` is the operative instruction set. This README is for humans evaluating or installing the skill.
-
 # supervised-coding
 
-A Claude Code [skill](https://code.claude.com/docs/en/skills) that makes an AI agent build code the way a careful senior pair would: **plan top-down, then build bottom-up in small, approval-gated chunks** — instead of emitting a whole implementation in one dump.
+> **🤖 Agents & 👤 humans:** this README is the high-level overview. **The operative
+> procedure — every rule, every step — lives in [`SKILL.md`](SKILL.md).** Read that.
 
-## Why
+A Claude Code [skill](https://code.claude.com/docs/en/skills) that stops an agent
+from dumping a whole implementation. It builds in documented, approval-gated stages so you:
 
-Large one-shot code generations are hard to review, hard to learn from, and easy to get subtly wrong. This skill forces the agent to slow down:
+- control the shape
+- confirm as it goes
+- learn the code instead of receiving a wall of it
 
-- You see the **design first** (interfaces and classes), and sign off before any code is written.
-- You **name things** — the agent offers options, you pick or write your own.
-- Code arrives **one digestible chunk at a time**, each explained in a sentence or two, each gated on your explicit yes/no.
-- You end up understanding the code, not just receiving it — and the code tends to be better for having been planned.
+---
 
-## Flow
+### ▸ Slide 1 — The idea
 
-| Stage | What happens |
-| :-- | :-- |
-| **0 — Offer & record** | Agent states the mode fits and asks; never enters silently. |
-| **1 — Plan** | Interfaces & classes **first** (required), then user-story flow, files/roles, build order. One approval, no code yet. |
-| **1b — Diagram** | By default, a backgrounded `drawio-diagrammer` agent renders the design as a `.drawio` file (a shared whiteboard in the VS Code draw.io plugin). The naming pass runs in parallel while it builds. |
-| **2 — Naming** | For each name, an array of 2–4 candidates with rationale; you pick or type your own. |
-| **3 — Build** | One chunk per turn, sized to be comprehensible at a glance and explainable in 1–3 sentences. Teach → show → `yes / revise / stop`. |
+Plan **breadth-first, top-down**. Build **depth-first, in vertical slices**.
+Everything moves one small, digestible chunk at a time — explicit **yes / no** on each.
+Required procedure, even for small tasks (skipping needs your permission).
 
-## What's in here
+---
+
+### ▸ Slide 2 — The stages (top-down)
 
 ```
-supervised-coding/
-├── SKILL.md       # operative instructions (the agent reads this)
-├── reference.md   # copy-paste templates: offer, plan, diagram, naming, chunk
-├── draw-io/       # bundled draw.io diagramming skill (self-contained, no plugin dependency)
-└── README.md      # this file
+0. Offer & record        →  agent asks before engaging; never silent
+1. Requirements          →  reqs, constraints, primary-path user story
+2. Stack / platform      →  research & offer options; surface early arch choices
+3. Architecture          →  deep modules behind interfaces; breadth-first, diagrammed
+4. Sprint planning        →  vertical slices, sized like a one-week dev sprint
+5. Build & deliver        →  slices, proven by REAL operation (not just unit tests)
 ```
 
-The `draw-io/` subfolder is bundled so the diagramming agent can be pointed at a local path rather than depending on a separately installed plugin.
+---
+
+### ▸ Slide 3 — The loops
+
+```
+Cascade:   change an early stage  →  re-walk every later stage, in order
+Chunk:     each step  →  teach → show → (yes / revise / stop) → next
+Slice:     build feature → prove it runs → commit → next feature
+```
+
+---
+
+### ▸ Slide 4 — Packaged draw.io skill
+
+The [`draw-io/`](draw-io/) subfolder is a **bundled, self-contained diagramming skill**.
+
+- used by a background agent during architecture (Stage 3)
+- builds one growing `.drawio` diagram of the design — a shared whiteboard
+- open it in a draw.io editor (VS Code extension or local app)
+- no separate plugin install required
+- no editor? the agent exports PNGs for you to view
+
+---
 
 ## Install
-
-Clone into your personal skills directory so it's available across all your projects:
 
 ```bash
 git clone https://github.com/RandyHaylor/supervised-coding.git ~/.claude/skills/supervised-coding
 ```
 
-Or per-project: clone into a project's `.claude/skills/` instead.
+(Or clone into a project's `.claude/skills/` for that project only.)
 
 ## Use
 
-- **Manually:** type `/supervised-coding` in Claude Code.
-- **Automatically:** the agent may offer the mode when you ask it to build, implement, or scaffold non-trivial code — it will ask before engaging.
+- **Manually:** `/supervised-coding`
+- **Automatically:** the agent offers the mode when you ask it to build something
+  non-trivial — it asks before engaging.
 
 ## License
 

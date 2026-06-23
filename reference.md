@@ -1,72 +1,87 @@
 # supervised-coding — templates
 
-Copy these shapes when running the flow. Keep every block scannable.
+Copy these shapes when running the flow. Keep every block scannable. Stage
+numbers match `SKILL.md`.
 
 ## Stage 0 — Offer block
 
 ```
 This looks like a good fit for supervised-coding mode: <one-line reason>.
-That means I'll plan it top-down, get your sign-off, offer naming options,
-then build it up one small chunk at a time — pausing for your yes/no on each.
+That means we work in documented, approval-gated stages — requirements, stack,
+architecture, sprint planning, then build & deliver slices — one small chunk at
+a time with your yes/no on each.
 
 Use supervised-coding mode for this? (yes / no)
 ```
 
 Record the answer. On "no", build normally and don't re-offer for this task.
 
-## Stage 1 — Plan block
-
-Interfaces and classes are required and come first.
+## Up-front — planning-doc agent ask (required)
 
 ```
-## Plan: <feature name>
-
-### Interfaces / contracts   (required, first)
-- functionName(arg: Type) -> ReturnType   # what it promises
-- type ShapeName = { field: Type }
-
-### Classes / components   (required)
-- ClassName — <responsibility>; relates to <other> by <relationship>
-
-### User-story flow
-1. <user does X> → <system does Y> → <result Z>
-
-### Files & roles
-- path/to/fileOne — <single responsibility>
-- path/to/fileTwo — <single responsibility>
-
-### Build order (chunks I'll produce, bottom-up)
-1. <lowest-level unit>
-2. <next layer>
-3. <wiring / entrypoint>
-
-Approve this plan, or tell me what to change.
+Want a background agent to maintain a running planning doc as we go? It captures
+each stage's output. Token cost is non-trivial. (yes / no)
 ```
 
-## Stage 1b — Diagram delegation
+If yes, spawn once and reuse its session (like the diagrammer). If the user
+declined and the architecture later gets complex, ask once more.
 
-Spawn once, then reuse the session for all updates.
+## Stage 1 — Requirements block
+
+```
+## Requirements
+- Functional requirements: <...>
+- Technical constraints: <...>
+- Primary-path user story: <user does X> → <system does Y> → <result Z>
+
+Confirm / correct before we pick a stack.
+```
+
+## Stage 2 — Stack / platform block
+
+```
+## Stack options (driven by: <devices, features, extensibility needed>)
+  A) <stack/lang/platform> — <tradeoffs; any early architecture choice it forces>
+  B) <stack/lang/platform> — <tradeoffs>
+Pick one or propose your own. (I'll document the choice + rationale.)
+```
+
+## Stage 3 — Architecture (breadth-first, top-down) + diagram
+
+Map larger components, break toward deep modules, define each module's role,
+interface, and I/O. Present one digestible piece at a time; name as you go.
+
+```
+## Architecture — level <N>
+- Component / deep module: <name>
+    role: <what it is / does>
+    interface: <signatures it exposes>
+    I/O: <in → out>
+    isolation: <how it's testable on its own>
+Confirm this level, then we go one level deeper.
+```
+
+Diagram delegation — spawn once, reuse the session for all updates:
 
 ```
 Agent: name=drawio-diagrammer, run_in_background=true
 Prompt:
   Read the bundled draw-io skill at <this-skill-dir>/draw-io/SKILL.md (and the
-  section files it links). Create a .drawio diagram of this design so
-  the user and I can use it as a shared whiteboard in the VS Code draw-io
-  plugin. Diagram these interfaces/types/classes and their relationships:
-  <paste the Stage 1 interfaces + classes>.
-  Naming conventions to honor: verbose, purpose-driven names clear out of
-  context; verbs for actions, nouns for things; name for purpose not
-  implementation. Return the .drawio file path and a one-line summary.
+  section files it links). Diagram these components / deep modules / interfaces
+  and their relationships: <paste current architecture>. I'll send more as the
+  plan grows — keep one growing diagram. Naming rules to honor: understandable
+  out of context; verbs for actions, nouns for things; name for role, not the
+  implementation it builds. Return the .drawio file path and a one-line summary.
 ```
 
-- Save the returned agent name/session id. For later changes, **SendMessage to
-  the same `drawio-diagrammer`** — don't spawn a new one.
-- Review the returned diagram's labels against the naming conventions before
-  accepting.
-- Skip only if the user opts out or the change has no new types/relationships.
+- Feed new details to the **same** agent via SendMessage as planning progresses.
+- Suggest the user open the `.drawio` in a draw-io editor (VS Code extension or
+  local draw.io app) as a shared live whiteboard.
+- If no editor: agent provides PNG exports for the user; the agent references the
+  `.drawio` source (better than the image).
+- Review returned labels against the naming rules.
 
-## Stage 2 — Naming options block
+## Naming options block (use wherever a name is introduced)
 
 One block per name. Offer 2–4 candidates; the user picks or writes their own.
 
@@ -78,16 +93,59 @@ Name for <the thing it names>:
 Pick A/B/C or type your own.
 ```
 
-Naming conventions to honor:
-- Verbose, purpose-driven, clear out of context.
+Naming rules to honor (full set in SKILL.md → "Naming & language rules"):
+- Understandable out of context; promote readable code (SOLID).
 - Verbs for actions, nouns for things.
-- Name for purpose, not implementation.
+- Name for role, not the implementation it builds — unless a hard framework
+  convention makes the conventional name less confusing.
 - Flag any name that isn't a real convention for this codebase/platform.
 
-## Stage 3 — Chunk block
+### Example — names that follow the rules
+
+Encapsulate clever expressions behind role names; keep `main` reading like intent.
+
+```python
+# BAD — app-in-a-line; reduce/filter dumped as logic; nothing names the role
+def main():
+    print(reduce(lambda running, tx: running + tx["amount"],
+                 filter(lambda tx: tx["status"] == "settled", load()), 0))
+
+# GOOD — main states intent; the clever bits are encapsulated and named for role
+def main():
+    transactions = load_transactions_from_ledger()
+    settled_revenue = total_settled_revenue(transactions)
+    write_revenue_report(settled_revenue)
+
+def total_settled_revenue(transactions):
+    settled_transactions = [tx for tx in transactions if tx["status"] == "settled"]
+    settled_amounts = [tx["amount"] for tx in settled_transactions]
+    return sum(settled_amounts)
+```
+
+Why it passes:
+- `main` is a sequence of well-named calls — a statement of intent, no plumbing.
+- `total_settled_revenue` names the **role/result**, not "reduce" or "the loop".
+- No implementation leaks through the name; reads correctly out of context.
+- Not narrated English (`NowSumTheList`) and not a hieroglyphic one-liner.
+
+## Stage 4 — Vertical-slice (sprint) plan block
 
 ```
-### Chunk N of ~M: <chunk name>  (from build-order step N)
+## Sprints (vertical slices)
+Sprint 1 — <feature name>: <the end-to-end thing a user can do after this>
+  feature tasks (Stage-3 components built out just enough for this slice):
+    - <component> → <built only as far as this slice needs>
+  runs end-to-end & deployable: <how>
+Sprint 2 — <feature name>: ...
+```
+
+Sizing: a slice is **NOT the absolute minimum** — it's a comfortable short sprint,
+as if one dev did a one-week sprint. Phrase work as sprints/features.
+
+## Stage 5 — Chunk block (build & deliver)
+
+```
+### Chunk N of ~M: <chunk name>  (sprint: <feature>)
 
 What it does:
 - <succinct bullet>
@@ -101,5 +159,7 @@ Approve this chunk? (yes / revise / stop)
 Rules of thumb:
 - Size test: comprehensible at a glance AND explainable in 1–3 sentences. If not, split it.
 - Explain in succinct bullets, not prose.
-- Never advance to chunk N+1 without an explicit yes on chunk N.
-- On "revise", re-present the same chunk; don't move on.
+- Never advance without an explicit yes.
+- A sprint is delivered only when proven by **real operation** (output, screenshot,
+  runtime demo) — NOT just unit tests.
+- Commit after every completed feature — even a local-only git repo.
