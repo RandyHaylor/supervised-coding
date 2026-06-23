@@ -41,13 +41,19 @@ Load `reference.md` for templates before starting.
 - Each stage produces a **documented** artifact.
 - **Where/how to document** (in priority order): an established user preference; else
   the **`source-of-truth-agent-tool`** skill (RandyHaylor) for requirements
-  documentation and task tracking, if present; else your best judgment. If that
+  documentation and task tracking, if present; else the **default below**. If that
   skill isn't installed, **suggest installing it**.
+- **Default doc location (when no preference and not using source-of-truth):** a
+  `docs/` directory **inside the git repo**, one file per artifact —
+  `docs/requirements.md`, `docs/architecture.md`, `docs/sprints.md` (the diagram
+  `.drawio` also lives in the repo). Docs must be **durable files, never just chat
+  scrollback** — the cascade rescan below depends on having real files to scan.
 - **Required, ask once up front:** does the user want a **background agent to build
   out a running planning doc as you go?** State the token cost is non-trivial.
   - Yes → spawn one background agent for it; reuse that one session for every
     update (never re-spawn); feed it each stage's output as you go.
-  - No → keep documentation lightweight and inline.
+  - No → still write the durable docs above yourself; "lightweight" means terse,
+    not absent.
 - **If the user declined and the architecture starts getting complex, suggest it
   once more** at that point.
 
@@ -145,7 +151,8 @@ Load `reference.md` for templates before starting.
 ## Stage 5 — Build & deliver slices (iterate)
 - Build one slice at a time, in small approval-gated chunks (see chunk rules above).
 - State the easy/minimal vs the correct/proper approach when they differ; do the proper one.
-- **End of each sprint** (a sprint ends when its feature is done) — run this in order:
+- **End of each sprint** (a sprint ends when **all its feature tasks are done and
+  the slice runs end-to-end** — not after each individual feature task) — run this in order:
   1. **Prove the vertical slice by real operation.** The deliverable is the actual
      solution working **end-to-end, provable, and usable** — not unit tests, not a
      description of what it would do. This does **not** mean "must have a UI": prove
@@ -187,6 +194,10 @@ Naming:
   Aim: readability + abstraction level appropriate to the current script.
 
 ## Other rules
+- **Lost background-agent session:** "never re-spawn" assumes the handle survives. If
+  it's lost (context summary, restart, dead session), that's the one allowed
+  exception — spawn a fresh agent, re-feed current state from the docs, tell the
+  user, and continue. Don't stall waiting for a handle that's gone.
 - **Testing** (unit/integration) is encouraged where it's a genuine value-add — it's
   up to the agent to suggest it to the user. It is **separate from** the Stage 5
   delivery proof, which is always required (real, end-to-end operation).

@@ -180,7 +180,8 @@ Rules of thumb:
 - Size test: comprehensible at a glance AND explainable in 1–3 sentences. If not, split it.
 - Explain in succinct bullets, not prose.
 - Never advance without an explicit yes.
-- End-of-sprint sequence (sprint ends when its feature ends): (1) prove the slice by
+- End-of-sprint sequence (sprint ends when ALL its feature tasks are done and the
+  slice runs end-to-end — not per feature task): (1) prove the slice by
   **real operation** — the actual solution working end-to-end, provable and usable
   (not unit tests, not a description); prove it through whatever interface it has
   (a CLI should at least run and show `--help` after sprint 1); (2) update docs
