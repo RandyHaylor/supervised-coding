@@ -16,6 +16,17 @@ Use supervised-coding mode for this? (yes / no)
 
 Record the answer. On "no", build normally and don't re-offer for this task.
 
+## Setup — git ask (required; git is assumed needed)
+
+```
+Do you want to create an online git repo to back up our progress as we go, or
+just use a local-only git repo so we can isolate work in feature branches and
+easily roll back code?
+```
+
+Never offer "no repo" as an option. Only skip if the user, unprompted, explicitly
+refuses a repo. At minimum a local repo is required (for docs + rollback).
+
 ## Up-front — planning-doc agent ask (required)
 
 ```
@@ -61,10 +72,15 @@ interface, and I/O. Present one digestible piece at a time; name as you go.
 Confirm this level, then we go one level deeper.
 ```
 
-Diagram delegation — spawn once, reuse the session for all updates:
+Tech spikes: resolve feasibility/compatibility/architecture doubts here in
+planning — assign to a subagent while you keep planning. Never inside a sprint.
+
+Diagram delegation — no special agent type exists; spawn an ordinary background
+agent, name it `drawio-diagrammer`, spawn once, reuse the session for all updates
+(separate from the optional planning-doc agent — don't cross their sessions):
 
 ```
-Agent: name=drawio-diagrammer, run_in_background=true
+Agent: ordinary background agent, name=drawio-diagrammer, run_in_background=true
 Prompt:
   Read the bundled draw-io skill at <this-skill-dir>/draw-io/SKILL.md (and the
   section files it links). Diagram these components / deep modules / interfaces
@@ -140,26 +156,33 @@ Sprint 2 — <feature name>: ...
 ```
 
 Sizing: a slice is **NOT the absolute minimum** — it's a comfortable short sprint,
-as if one dev did a one-week sprint. Phrase work as sprints/features.
+as if one dev did a one-week sprint. Phrase work as sprints/features. A sprint IS
+the vertical slice; a feature is a task inside it, not a slice on its own.
 
 ## Stage 5 — Chunk block (build & deliver)
 
+Work through the sprint's numbered feature tasks. A chunk is just how one feature
+task is shown when it's too big for a single look — no separate chunk numbering.
+
 ```
-### Chunk N of ~M: <chunk name>  (sprint: <feature>)
+### Sprint <N> · feature task <N>: <name>
 
 What it does:
 - <succinct bullet>
 - <succinct bullet>      # 1–3 sentences total, bullets not prose
 
-<code for this chunk only>
+<code for this piece only>
 
-Approve this chunk? (yes / revise / stop)
+Approve? (yes / revise / stop)
 ```
 
 Rules of thumb:
 - Size test: comprehensible at a glance AND explainable in 1–3 sentences. If not, split it.
 - Explain in succinct bullets, not prose.
 - Never advance without an explicit yes.
-- A sprint is delivered only when proven by **real operation** (output, screenshot,
-  runtime demo) — NOT just unit tests.
-- Commit after every completed feature — even a local-only git repo.
+- End-of-sprint sequence (sprint ends when its feature ends): (1) prove the slice by
+  **real operation** — the actual solution working end-to-end, provable and usable
+  (not unit tests, not a description); prove it through whatever interface it has
+  (a CLI should at least run and show `--help` after sprint 1); (2) update docs
+  (cascade); (3) commit — even a local-only repo; push before the next sprint if
+  there's more to push.

@@ -22,6 +22,11 @@ when_to_use: >-
 > TO SKIP THESE STEPS WITHOUT EXPLICIT USER PERMISSION. IF SKIPPING STEPS IS
 > REQUIRED OR OBVIOUSLY BENEFICIAL, YOU MUST GET EXPLICIT PERMISSION.**
 
+> **THE SPRINT / FEATURE / VERTICAL SLICE AND OTHER VOCABULARY ARE CRITICAL TO AI
+> AGENTS 'UNDERSTANDING' HOW TO BREAK UP CODING WORK AND MUST BE KEPT AND ADHERED
+> TO. YOU MAY NOT WORK WITHOUT PLANNING WORK AS A SPRINT, EVEN IF IT'S A SMALL
+> SPRINT WITH A COUPLE FEATURES.**
+
 Plan breadth-first top-down; build depth-first in vertical slices. Everything
 happens in small, approval-gated chunks — never dump a big plan or big code.
 Load `reference.md` for templates before starting.
@@ -34,21 +39,43 @@ Load `reference.md` for templates before starting.
 
 ## Cascade & documentation rule (governs all stages)
 - Each stage produces a **documented** artifact.
+- **Where/how to document** (in priority order): an established user preference; else
+  the **`source-of-truth-agent-tool`** skill (RandyHaylor) for requirements
+  documentation and task tracking, if present; else your best judgment. If that
+  skill isn't installed, **suggest installing it**.
 - **Required, ask once up front:** does the user want a **background agent to build
   out a running planning doc as you go?** State the token cost is non-trivial.
-  - Yes → spawn one (reuse its session like the diagrammer; never re-spawn); feed
-    it each stage's output as you go.
+  - Yes → spawn one background agent for it; reuse that one session for every
+    update (never re-spawn); feed it each stage's output as you go.
   - No → keep documentation lightweight and inline.
 - **If the user declined and the architecture starts getting complex, suggest it
   once more** at that point.
-- Change anything in an earlier stage → back up and re-walk every later stage, in order.
-- Change stack/platform (Stage 2) but not requirements → must revisit architecture
-  (Stage 3) before resuming the build.
+
+### When you change an earlier stage — MANDATORY, this is how documentation dies
+- **Think out loud about the blast radius** before touching anything: e.g. "we're
+  changing a requirement, but this does not change the architecture or the
+  diagram — only the sprint list." Re-walk to the degree actually necessary.
+- **But you STILL go through and SCAN every downstream document EVERY TIME to
+  confirm it's still current** — requirements, architecture, the diagram, the
+  sprint list, and the feature docs. Confirming "still accurate" is required work,
+  not optional. Stale docs are how this whole process rots; do not let it.
+- **Fan out: spawn multiple background agents in parallel** to scan/refresh the
+  docs quickly so this stays cheap in time and primary context.
+- Requirements and architecture should not change often. A stack/platform change
+  (Stage 2) that doesn't touch requirements still **requires** revisiting
+  architecture (Stage 3) before resuming the build.
 
 ## Stage 0 — Offer & record (always first)
 - Don't enter silently. State the mode fits + one-line reason, ask yes/no.
 - Record it. No → build normally, don't re-offer for this task.
 - Direct `/supervised-coding` invocation = yes; skip the offer.
+- **Git is required.** This skill needs at least a local git repo — for the
+  documentation and rollback — even if no local code is written. In setup, ask:
+  > "Do you want to create an online git repo to back up our progress as we go, or
+  > just use a local-only git repo so we can isolate work in feature branches and
+  > easily roll back code?"
+  - **Assume git is needed. Never suggest having no repo.** Only skip the repo if
+    the user, unprompted, explicitly says not to make one.
 
 ## Stage 1 — Requirements
 - Methodically define and document: functional requirements, technical
@@ -70,26 +97,41 @@ Load `reference.md` for templates before starting.
 - For each module, define its **role, interface, and I/O up front**.
 - Design so modules are **testable in isolation** wherever possible.
 - Name modules/interfaces here per the Naming & language rules; offer options.
-- Diagram via the draw-io agent (below); the diagram grows as the breakdown deepens.
+- Diagram via the diagramming agent (below); the diagram grows as the breakdown deepens.
+- **Tech spikes belong here, in planning — not in a sprint.** A spike is a throwaway
+  test to find out if something works, is compatible, or whether a theory holds. If
+  there's any doubt about the architecture or stack up front, **dispel it with a
+  spike**: assign it to a subagent while you keep planning. (A spike done inside a
+  sprint isn't a spike — that's just developing.) Spikes may also be run between
+  sprints if a new doubt appears.
 - Documented output: the component map + module interfaces.
 
-### Diagram delegation (default ON when structure is more than trivial)
-- Spawn agent `drawio-diagrammer`, `run_in_background=true`; in its prompt point it
-  to the bundled skill at `<this-skill-dir>/draw-io/SKILL.md` (read that file + its
-  sections), then have it diagram the components/modules/interfaces + relationships.
-- **As planning progresses, the main agent feeds new details to the same spawned
-  agent** so there's a single growing diagram to reference.
+### Diagram delegation (default ON above the trivial bar)
+- **The bar:** draw it whenever the design has more than a couple of pieces
+  (roughly: 3+ functions/types/classes, or any relationship worth seeing). Below
+  that bar, skip it.
+- There is **no special agent type or agent file** for this — spawn an ordinary
+  background agent (`run_in_background=true`) and **name it `drawio-diagrammer`** so
+  it's addressable. In its prompt, point it to the bundled skill at
+  `<this-skill-dir>/draw-io/SKILL.md` (read that file + its sections), then have it
+  diagram the components/modules/interfaces + relationships.
+- **As planning progresses, the main agent feeds new details to that same agent**
+  so there's a single growing diagram to reference.
 - **Keep its session id/name; reuse via SendMessage for all updates — never re-spawn.**
   Saves tokens, protects primary context, frees the primary agent to keep working.
+- This is a **separate** background agent from the optional planning-doc agent;
+  track the two session ids separately and never cross them.
 - **Suggest the user open it in a draw-io editor** (VS Code extension or local
   draw.io app) so the `.drawio` is a shared, live whiteboard both can edit.
 - **If no editor is available**, have the agent provide **PNG exports** for the
   user to look at. The agent itself should reference the **`.drawio` source**, not
   the PNG — the source is the better reference.
 - Pass the naming rules in its prompt; review returned labels against them.
-- Skip only if the user opts out or there's no meaningful structure to draw.
+- Skip only if the user opts out or the design is below the bar above.
 
 ## Stage 4 — Vertical-slice planning (as real sprints)
+- **A sprint is a vertical slice. A feature is not a vertical slice** — features are
+  the tasks inside a sprint; the sprint as a whole is the slice that runs end-to-end.
 - Define the slices as **actual sprints**, and the feature tasks as the Stage-3
   components **built out just enough to make that slice work**.
 - A slice is **NOT "the absolute minimum you can do"** — it is **a comfortable
@@ -97,14 +139,25 @@ Load `reference.md` for templates before starting.
 - Each slice runs **end-to-end and is deployable** ("anything built works").
 - Phrase the work as sprints/features (required — it markedly improves how the
   work gets broken up). Document the ordered sprint/feature list.
+- **No tech spikes in sprints.** Feasibility/compatibility doubts are resolved in
+  planning (Stage 3) or between sprints — never folded into a sprint's work.
 
 ## Stage 5 — Build & deliver slices (iterate)
 - Build one slice at a time, in small approval-gated chunks (see chunk rules above).
-- A slice is done only when **delivery is proven by real operation** — output,
-  screenshot, runtime demo, etc. **NOT just unit tests.**
 - State the easy/minimal vs the correct/proper approach when they differ; do the proper one.
-- **Commit after every feature is complete** — even if it's just a local git repo.
-- After each slice: confirm delivered, then start the next.
+- **End of each sprint** (a sprint ends when its feature is done) — run this in order:
+  1. **Prove the vertical slice by real operation.** The deliverable is the actual
+     solution working **end-to-end, provable, and usable** — not unit tests, not a
+     description of what it would do. This does **not** mean "must have a UI": prove
+     it through whatever interface the thing actually has. If it's a command-line
+     tool, then after sprint 1 it had better at least run and show a `--help`
+     section. Demonstrate it with real output / screenshot / runtime transcript.
+     Do not shirk the real deliverable.
+  2. **Update the docs** (cascade rule) so requirements/architecture/diagram/
+     sprints/features stay current.
+  3. **Commit** — even if it's just a local git repo. If there's more to push,
+     **push before starting the next sprint.**
+- Then confirm delivered and start the next sprint.
 
 ## Naming & language rules
 
@@ -134,6 +187,9 @@ Naming:
   Aim: readability + abstraction level appropriate to the current script.
 
 ## Other rules
+- **Testing** (unit/integration) is encouraged where it's a genuine value-add — it's
+  up to the agent to suggest it to the user. It is **separate from** the Stage 5
+  delivery proof, which is always required (real, end-to-end operation).
 - Never claim a chunk or slice is tested unless you actually ran it.
-- When you spawn the draw-io agent (or any agent), pass these naming & language
-  rules into its prompt and review its returned work against them.
+- For any agent you spawn (diagramming, planning-doc, spikes, doc-scan), pass these
+  naming & language rules into its prompt and review its returned work against them.
