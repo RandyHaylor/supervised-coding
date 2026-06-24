@@ -221,9 +221,15 @@ Load `reference.md` for templates before starting.
      tool, then after sprint 1 it had better at least run and show a `--help`
      section. Demonstrate it with real output / screenshot / runtime transcript.
      Do not shirk the real deliverable.
-  2. **Update the docs** (cascade rule) so requirements/architecture/diagram/
-     sprints/features stay current.
-  3. **Commit** — even if it's just a local git repo. If there's more to push,
+  2. **Get explicit user acceptance of the slice** (yes). The slice is not "done"
+     until the user accepts the proven operation. Do not run the formal
+     documentation step below until the slice is accepted.
+  3. **As-built doc update (REQUIRED).** Update docs/diagrams to match what was
+     **actually built**, not what was planned — they carry forward as the reference.
+     Scan, compare to as-built, change what drifted, leave what holds.
+     - Diagram: feed changes to the `drawio-diagrammer` agent (reuse via SendMessage).
+     - Docs (cascade rule): requirements, architecture, sprint/feature list.
+  4. **Commit** — even if it's just a local git repo. If there's more to push,
      **push before starting the next sprint.**
 - Then confirm delivered and start the next sprint.
 
