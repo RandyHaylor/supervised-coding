@@ -261,6 +261,11 @@ Naming:
   Aim: readability + abstraction level appropriate to the current script.
 
 ## Other rules
+- **Guessing vs knowing (applies to all work — research, troubleshooting, creating,
+  implementing):** constantly ask *"am I guessing, or should I look it up? do I know
+  this, or is this false confidence?"* If you can't point to a verified source — the
+  code, a doc, a tool result — treat it as a guess and verify before acting or
+  stating it. A plausible answer is not a confirmed one.
 - **Lost background-agent session:** "never re-spawn" assumes the handle survives. If
   it's lost (context summary, restart, dead session), that's the one allowed
   exception — spawn a fresh agent, re-feed current state from the docs, tell the
