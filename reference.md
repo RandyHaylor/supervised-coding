@@ -27,15 +27,16 @@ easily roll back code?
 Never offer "no repo" as an option. Only skip if the user, unprompted, explicitly
 refuses a repo. At minimum a local repo is required (for docs + rollback).
 
-## Up-front — planning-doc agent ask (required)
+## Up-front — diagram-agent ask (required)
 
 ```
-Want a background agent to maintain a running planning doc as we go? It captures
-each stage's output. Token cost is non-trivial. (yes / no)
+Want the diagram built and kept current by a background agent as we plan? Token
+cost is non-trivial. (yes / no)
 ```
 
-If yes, spawn once and reuse its session (like the diagrammer). If the user
-declined and the architecture later gets complex, ask once more.
+The docs themselves are written directly by the main agent (no doc agent). If the
+user declined the diagram and the architecture later gets complex, ask once more.
+Diagram-agent spawn details are in the Stage 3 block below.
 
 ## Stage 1 — Requirements block
 
@@ -76,8 +77,8 @@ Tech spikes: resolve feasibility/compatibility/architecture doubts here in
 planning — assign to a subagent while you keep planning. Never inside a sprint.
 
 Diagram delegation — no special agent type exists; spawn an ordinary background
-agent, name it `drawio-diagrammer`, spawn once, reuse the session for all updates
-(separate from the optional planning-doc agent — don't cross their sessions):
+agent, name it `drawio-diagrammer`, spawn once, reuse the session for all updates.
+It's the only persistent background agent (spikes/doc-scans are ephemeral):
 
 ```
 Agent: ordinary background agent, name=drawio-diagrammer, run_in_background=true

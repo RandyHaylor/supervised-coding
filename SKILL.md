@@ -48,14 +48,13 @@ Load `reference.md` for templates before starting.
   `docs/requirements.md`, `docs/architecture.md`, `docs/sprints.md` (the diagram
   `.drawio` also lives in the repo). Docs must be **durable files, never just chat
   scrollback** — the cascade rescan below depends on having real files to scan.
-- **Required, ask once up front:** does the user want a **background agent to build
-  out a running planning doc as you go?** State the token cost is non-trivial.
-  - Yes → spawn one background agent for it; reuse that one session for every
-    update (never re-spawn); feed it each stage's output as you go.
-  - No → still write the durable docs above yourself; "lightweight" means terse,
-    not absent.
-- **If the user declined and the architecture starts getting complex, suggest it
-  once more** at that point.
+- The main agent writes these docs directly as it goes — there is no separate
+  "doc agent." The only background agent is the diagramming one (Stage 3).
+- **Required, ask once up front:** does the user want the **diagram built and kept
+  current by a background agent as you plan?** State the token cost is non-trivial.
+  (Details of that agent are in Stage 3.)
+- **If the user declined and the architecture starts getting complex, suggest the
+  diagram agent once more** at that point.
 
 ### When you change an earlier stage — MANDATORY, this is how documentation dies
 - **Think out loud about the blast radius** before touching anything: e.g. "we're
@@ -125,8 +124,10 @@ Load `reference.md` for templates before starting.
   so there's a single growing diagram to reference.
 - **Keep its session id/name; reuse via SendMessage for all updates — never re-spawn.**
   Saves tokens, protects primary context, frees the primary agent to keep working.
-- This is a **separate** background agent from the optional planning-doc agent;
-  track the two session ids separately and never cross them.
+- This is the only **persistent (reused)** background agent (the user approved it up
+  front per the cascade rule); spikes and cascade doc-scans are separate, ephemeral
+  one-shot agents. If the user declined the diagram, draw nothing — the `docs/`
+  files and inline architecture notes stand in.
 - **Suggest the user open it in a draw-io editor** (VS Code extension or local
   draw.io app) so the `.drawio` is a shared, live whiteboard both can edit.
 - **If no editor is available**, have the agent provide **PNG exports** for the
@@ -202,5 +203,5 @@ Naming:
   up to the agent to suggest it to the user. It is **separate from** the Stage 5
   delivery proof, which is always required (real, end-to-end operation).
 - Never claim a chunk or slice is tested unless you actually ran it.
-- For any agent you spawn (diagramming, planning-doc, spikes, doc-scan), pass these
+- For any agent you spawn (diagramming, spikes, doc-scan), pass these
   naming & language rules into its prompt and review its returned work against them.
