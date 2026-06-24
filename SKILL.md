@@ -31,6 +31,29 @@ Plan breadth-first top-down; build depth-first in vertical slices. Everything
 happens in small, approval-gated chunks — never dump a big plan or big code.
 Load `reference.md` for templates before starting.
 
+> **ENTRY GATE — BEFORE YOU EVEN BEGIN STANDING UP THIS SKILL.** The very first
+> thing, ahead of all standup/setup (before the git question, before requirements,
+> before anything you might want recorded): **the documentation home must be decided
+> AND in place.** You cannot begin the skill's own standup without it — recording does
+> not work retroactively, so a home chosen late loses everything said before it
+> existed (the `source-of-truth-agent-tool`, if chosen, especially cannot capture
+> answers after the fact). No doc home live → do not proceed with standup. See the
+> cascade rule and Stage 0.
+
+> **ABSOLUTE PRECONDITION FOR DOING ANY WORK — NEVER VIOLATE.** You may not build,
+> implement, or change code until BOTH of these exist and are current for the work
+> at hand:
+> 1. a **formal vertical-slice sprints + features plan** (Stage 4) to work through, and
+> 2. an **understanding of the architecture you're working in (Stage 3) and how the
+>    work you're about to do may change it** (the blast radius).
+>
+> This holds whether the project is fresh OR resumed/handed off. **Existing
+> documentation, a README, prior chat notes, or "we already discussed it" do NOT
+> satisfy this** — only a real, current sprint/feature plan plus architectural
+> understanding do. If either is missing, produce it first (see Stage 0.5). If you
+> catch yourself reasoning "it's documented, just start building / jump to Stage 5,"
+> STOP — that is the exact failure this rule exists to prevent.
+
 ## How every chunk is delivered (applies to all stages)
 - One chunk per turn, explained in **succinct bullets, not prose**.
 - Chunk size: comprehensible at a glance AND explainable in 1–3 sentences. Too big → split.
@@ -39,6 +62,14 @@ Load `reference.md` for templates before starting.
 
 ## Cascade & documentation rule (governs all stages)
 - Each stage produces a **documented** artifact.
+- **DECIDE THE DOCUMENTATION HOME FIRST — before any other setup, question, or
+  discussion.** This is the very first thing settled in Stage 0, ahead of even the
+  git question. **Reason: recording does not work retrospectively.** If you discuss
+  requirements, stack, or anything else before the doc home is chosen and in place,
+  those answers are lost or have to be reconstructed — and the
+  `source-of-truth-agent-tool`, if chosen, **must already be set up to capture
+  answers as they are given; it cannot record them after the fact.** Settle the home,
+  set it up, *then* start asking anything you intend to record.
 - **Where/how to document** (in priority order): an established user preference; else
   the **`source-of-truth-agent-tool`** skill (RandyHaylor) for requirements
   documentation and task tracking, if present; else the **default below**. If that
@@ -72,6 +103,13 @@ Load `reference.md` for templates before starting.
 
 ## Stage 0 — Offer & record (always first)
 - Don't enter silently. State the mode fits + one-line reason, ask yes/no.
+- **FIRST ACTION once accepted — settle the documentation home, before anything else
+  is asked or recorded** (per the cascade rule). Decide between the
+  `source-of-truth-agent-tool` and `docs/` files, and **get it set up now**, because
+  answers cannot be recorded retroactively. Only after the home is live do you ask
+  the git question or begin requirements. If you skipped this and already collected
+  answers, say so plainly and re-capture them into the chosen home — do not pretend
+  they were recorded as-you-went.
 - Record it. No → build normally, don't re-offer for this task.
 - Direct `/supervised-coding` invocation = yes; skip the offer.
 - **Git is required.** This skill needs at least a local git repo — for the
@@ -81,6 +119,25 @@ Load `reference.md` for templates before starting.
   > easily roll back code?"
   - **Assume git is needed. Never suggest having no repo.** Only skip the repo if
     the user, unprompted, explicitly says not to make one.
+
+## Stage 0.5 — Resuming or picking up existing work (handoffs)
+- **Before any building, decide: is this fresh, or am I picking up work already in
+  progress** — a handoff, a prior session, or a codebase this skill never drove?
+- **Documentation existing does NOT mean a stage is satisfied, and it does NOT mean
+  you are at Stage 5.** A pile of docs, a README, or prior chat notes is not a
+  sprint/feature plan and is not architectural understanding.
+- **Walk Stages 1→4 in order and confirm each has a real, current documented artifact
+  *for the work you are about to do*** — requirements, stack, architecture, and the
+  **formal ordered sprint/feature plan**. Scan per the cascade rule to confirm
+  still-current; you need not rebuild what genuinely exists and holds.
+- **For any stage whose artifact is missing or doesn't cover the work at hand —
+  produce it now, with the user, before building.** Most commonly the missing one is
+  the Stage-4 sprint/feature plan: create a formal one (even a small sprint with a
+  couple of features) for the work ahead.
+- **Build an explicit understanding of the existing architecture and how the planned
+  work changes it (the blast radius)** before touching code — per the cascade rule.
+- **You may NOT enter Stage 5 until the absolute precondition above is met** for the
+  work at hand. "The work is documented" is never a substitute.
 
 ## Stage 1 — Requirements
 - Methodically define and document: functional requirements, technical
@@ -150,6 +207,9 @@ Load `reference.md` for templates before starting.
   planning (Stage 3) or between sprints — never folded into a sprint's work.
 
 ## Stage 5 — Build & deliver slices (iterate)
+- **Precondition (hard gate):** a formal Stage-4 sprint/feature plan covering this
+  work AND current architectural understanding (Stage 3) must exist — see the
+  absolute precondition near the top and Stage 0.5. Do not start building without both.
 - Build one slice at a time, in small approval-gated chunks (see chunk rules above).
 - State the easy/minimal vs the correct/proper approach when they differ; do the proper one.
 - **End of each sprint** (a sprint ends when **all its feature tasks are done and
