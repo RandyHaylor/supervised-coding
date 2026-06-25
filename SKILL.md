@@ -212,6 +212,24 @@ Load `reference.md` for templates before starting.
   absolute precondition near the top and Stage 0.5. Do not start building without both.
 - Build one slice at a time, in small approval-gated chunks (see chunk rules above).
 - State the easy/minimal vs the correct/proper approach when they differ; do the proper one.
+
+### Delivery modes (ask once at Stage 5 start; switchable anytime on request)
+- **Mode 1 — Work-unit:** describe a unit of work (e.g. a sprint feature) in bullets,
+  get yes/revise/stop, then implement it and return with it done. Coarser, fewer stops.
+- **Mode 2 — Code-change:** the unit is one small code change — a few one-line edits,
+  a function, a class skeleton, an interface/type def. For each: briefly say what it is
+  and how it fits the plan/pattern, **offer file/class/function/variable name choices as
+  questions**, get yes/revise/stop before applying. Finer; user steers names/shape live.
+- Default to asking which mode at Stage 5 start; the user can switch at any point.
+
+### Git-backed iteration loop (per code chunk / sprint feature)
+1. **Commit + push BEFORE starting** the chunk — clean restore point.
+2. Make the proposed changes.
+3. **Commit (do NOT push).**
+4. **Show the user the diff**; discuss / ask questions (names, fit).
+5. **Iterate** as needed — revise, commit, show diff again (repeat the commit→show loop).
+6. On approval, move to the next chunk (whose step 1 push carries the approved work up).
+
 - **End of each sprint** (a sprint ends when **all its feature tasks are done and
   the slice runs end-to-end** — not after each individual feature task) — run this in order:
   1. **Prove the vertical slice by real operation.** The deliverable is the actual
