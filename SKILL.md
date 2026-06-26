@@ -230,6 +230,23 @@ Load `reference.md` for templates before starting.
 5. **Iterate** as needed — revise, commit, show diff again (repeat the commit→show loop).
 6. On approval, move to the next chunk (whose step 1 push carries the approved work up).
 
+### Interactive desktop variant (read-only primary + launch-fork)
+An alternative way to realize the approve path on a desktop Claude CLI, with no
+orchestrator — the human drives it directly:
+- The live interactive session is the **primary**, made **read-only** by a one-off
+  `.claude/settings.local.json` whose PreToolUse hook runs a small script that
+  blocks write/edit/bash. The hook payload carries the **session id and transcript
+  (jsonl) path**, so the script blocks ONLY the primary session and lets a fork's
+  session through — the same settings file does not gate the fork.
+- The primary keeps the **launch-fork** tool (the save-fork family's
+  `/launch-fork`): when a chunk is approved, it opens a NEW terminal window running
+  a full-permission **fork** of the session that applies just that work; the user
+  works in that window, then returns to the primary to review and propose next.
+- Same principle as the headless orchestrated realization
+  (`RandyHaylor/approve-and-build-tool`): the conversational agent cannot write;
+  a disposable fork does the work. Forks are abandoned per chunk; a fresh fork is
+  taken from the primary for the next approved chunk.
+
 - **End of each sprint** (a sprint ends when **all its feature tasks are done and
   the slice runs end-to-end** — not after each individual feature task) — run this in order:
   1. **Prove the vertical slice by real operation.** The deliverable is the actual
